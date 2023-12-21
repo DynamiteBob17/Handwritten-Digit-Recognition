@@ -13,13 +13,14 @@ function App() {
     const [predictions, setPredictions] = useState(new Array(10).fill(0));
     const canvas = useRef(null);
     const model = useRef(null);
+
     const CLASS_NAMES = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const IMAGE_WIDTH = 28;
+    const IMAGE_HEIGHT = 28;
 
     function getModel() {
         const sequentialModel = tf.sequential();
 
-        const IMAGE_WIDTH = 28;
-        const IMAGE_HEIGHT = 28;
         const IMAGE_CHANNELS = 1;
 
         sequentialModel.add(tf.layers.conv2d({
@@ -82,14 +83,14 @@ function App() {
         };
         const fitCallbacks = show.fitCallbacks(container, metrics);
 
-        const BATCH_SIZE = 512;
-        const TRAIN_DATA_SIZE = 5500;
+        const BATCH_SIZE = 1024;
+        const TRAIN_DATA_SIZE = 11000;
         const TEST_DATA_SIZE = 1000;
 
         const [trainXs, trainYs] = tf.tidy(() => {
             const d = data.nextTrainBatch(TRAIN_DATA_SIZE);
             return [
-                d.xs.reshape([TRAIN_DATA_SIZE, 28, 28, 1]),
+                d.xs.reshape([TRAIN_DATA_SIZE, IMAGE_WIDTH, IMAGE_HEIGHT, 1]),
                 d.labels
             ];
         });
@@ -97,7 +98,7 @@ function App() {
         const [testXs, testYs] = tf.tidy(() => {
             const d = data.nextTestBatch(TEST_DATA_SIZE);
             return [
-                d.xs.reshape([TEST_DATA_SIZE, 28, 28, 1]),
+                d.xs.reshape([TEST_DATA_SIZE, IMAGE_WIDTH, IMAGE_HEIGHT, 1]),
                 d.labels
             ];
         })
@@ -112,8 +113,6 @@ function App() {
     }
 
     function doPrediction(data, testDataSize = 500) {
-        const IMAGE_WIDTH = 28;
-        const IMAGE_HEIGHT = 28;
         const testData = data.nextTestBatch(testDataSize);
         const testxs = testData.xs.reshape([testDataSize, IMAGE_WIDTH, IMAGE_HEIGHT, 1]);
         const labels = testData.labels.argMax(-1);
@@ -142,9 +141,6 @@ function App() {
     }
 
     async function predictDrawing() {
-        const IMAGE_WIDTH = 28;
-        const IMAGE_HEIGHT = 28;
-
         const image = new Image();
         image.src = await canvas.current.exportImage();
 
@@ -194,12 +190,12 @@ function App() {
                 const imageTensor = tf.tidy(() => {
                     return examples.xs
                         .slice([i, 0], [1, examples.xs.shape[1]])
-                        .reshape([28, 28, 1]);
+                        .reshape([IMAGE_WIDTH, IMAGE_HEIGHT, 1]);
                 });
 
                 const canvas = document.createElement('canvas');
-                canvas.width = 28;
-                canvas.height = 28;
+                canvas.width = IMAGE_WIDTH;
+                canvas.height = IMAGE_HEIGHT;
                 canvas.style = 'margin: 4px;';
                 await tf.browser.toPixels(imageTensor, canvas);
                 surface.drawArea.appendChild(canvas);
@@ -244,7 +240,7 @@ function App() {
                         <ReactSketchCanvas
                             width={'200px'}
                             height={'200px'}
-                            strokeWidth={14}
+                            strokeWidth={15}
                             strokeColor={'white'}
                             canvasColor={'black'}
                             ref={canvas}
