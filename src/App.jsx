@@ -4,12 +4,13 @@ import {MnistData} from './mnist/data.js';
 import {useEffect, useRef, useState} from 'react';
 import * as tf from '@tensorflow/tfjs';
 import {ReactSketchCanvas} from 'react-sketch-canvas';
-import {Button} from '@mui/material';
+import {Button, FormControl, InputLabel, MenuItem, NativeSelect, Select} from '@mui/material';
 
 function App() {
     const [data, setData] = useState(null);
     const [trainingModel, setTrainingModel] = useState(false);
     const [modelTrained, setModelTrained] = useState(false);
+    const [trainingDataSize, setTrainingDataSize] = useState(5500);
     const [predictions, setPredictions] = useState(new Array(10).fill(0));
     const canvas = useRef(null);
     const model = useRef(null);
@@ -84,13 +85,12 @@ function App() {
         const fitCallbacks = show.fitCallbacks(container, metrics);
 
         const BATCH_SIZE = 1024;
-        const TRAIN_DATA_SIZE = 11000;
         const TEST_DATA_SIZE = 1000;
 
         const [trainXs, trainYs] = tf.tidy(() => {
-            const d = data.nextTrainBatch(TRAIN_DATA_SIZE);
+            const d = data.nextTrainBatch(trainingDataSize);
             return [
-                d.xs.reshape([TRAIN_DATA_SIZE, IMAGE_WIDTH, IMAGE_HEIGHT, 1]),
+                d.xs.reshape([trainingDataSize, IMAGE_WIDTH, IMAGE_HEIGHT, 1]),
                 d.labels
             ];
         });
@@ -212,6 +212,8 @@ function App() {
         }
     }
 
+    const disableTraining = !data || modelTrained || trainingModel;
+
     let trainButtonText;
     if (trainingModel) {
         trainButtonText = 'Training in progress...';
@@ -220,23 +222,52 @@ function App() {
     } else {
         trainButtonText = 'Train NN';
     }
-    const trainButton = <Button
-        onClick={renderTensorFlowUIAndTrainModel}
-        disabled={!data || modelTrained || trainingModel}
-        size={'small'}
-        variant={'contained'}
-    >
-        {trainButtonText}
-    </Button>
+    const trainButton =
+        <Button
+            onClick={renderTensorFlowUIAndTrainModel}
+            disabled={disableTraining}
+            size={'small'}
+            variant={'contained'}
+            style={{marginBottom: '10px'}}
+        >
+            {trainButtonText}
+        </Button>
+
+    const selectForm =
+        <FormControl fullWidth disabled={disableTraining} size={'small'}>
+            <InputLabel variant={'standard'} htmlFor={'uncontrolled-native'}>Data size</InputLabel>
+            <NativeSelect
+                defaultValue={trainingDataSize}
+                inputProps={{
+                    name: 'trainingDataSize',
+                    id: 'uncontrolled-native'
+                }}
+                onChange={event => setTrainingDataSize(+event.target.value)}
+            >
+                <option value={550}>550</option>
+                <option value={5500}>5500</option>
+                <option value={55000}>55000</option>
+            </NativeSelect>
+        </FormControl>;
 
     return (
         <>
             <h1 style={{fontStyle: 'italic'}}>Handwritten Digit Recognition</h1>
             <h3 style={{fontStyle: 'italic'}}>by a Neural Network</h3>
             <div className={'App'}>
-                <div id={'sketch_area'}>
-                    {modelTrained ? <div style={{color: 'green'}}>MODEL TRAINED!</div> : trainButton}
-                    <div id={'sketch_canvas_wrapper'}>
+                <div id={'sketch-area'}>
+                    {
+                        modelTrained
+                            ? <div style={{color: 'green'}}>MODEL TRAINED!</div>
+                            : trainButton
+
+                    }
+                    <div>
+                        {
+                            modelTrained || selectForm
+                        }
+                    </div>
+                    <div id={'sketch-canvas-wrapper'}>
                         <ReactSketchCanvas
                             width={'200px'}
                             height={'200px'}

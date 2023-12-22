@@ -2,15 +2,15 @@
   display: flex;
   align-items: center;
 
-  button {
-    margin: 3px;
-  }
+  #sketch-area {
+    button:not(:first-child) {
+      margin: 3px;
+    }
 
-  #sketch_area {
     margin-right: 150px;
     margin-left: 150px;
 
-    #sketch_canvas_wrapper {
+    #sketch-canvas-wrapper {
       max-width: min-content;
       border: 2px solid gray;
       border-radius: 3px;
