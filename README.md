@@ -1,8 +1,8 @@
-# React + Vite
+# About
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- the app features the ability to train the neural network to recognize handwritten digits with different amounts of data from the MNIST database, as well as the ability to draw digits yourself and having the model recognize them
+- [live demo](https://clipchamp.com/watch/OpLvyRdsGvM)
 
-Currently, two official plugins are available:
+# How to use
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- run `npm install` and `npm run dev` from the project's root directory and the app should be served on localhost port 5173
